@@ -433,7 +433,17 @@ public class NilAgent {
 
 	private static byte[] remap(ClassLoader loader, byte[] clazz, MappingSet mappings) {
 		ClassProviderInheritanceProvider cpip = new ClassProviderInheritanceProvider(Opcodes.ASM9, new ClassLoaderClassProvider(loader == null ? ClassLoader.getSystemClassLoader() : loader));
-		LorenzRemapper lr = new LorenzRemapper(mappings, cpip);
+		LorenzRemapper lr = new LorenzRemapper(mappings, cpip) {
+			@Override
+			public String mapDesc(String descriptor) {
+				try {
+					return super.mapDesc(descriptor);
+				} catch (IllegalArgumentException e) {
+					// workaround for a strange ASM bug related to type annotations
+					return mapType(descriptor);
+				}
+			}
+		};
 		ClassReader reader = new ClassReader(clazz);
 		ClassWriter writer = new ClassWriter(reader, 0);
 		ClassRemapper cr = new ClassRemapper(writer, lr);
