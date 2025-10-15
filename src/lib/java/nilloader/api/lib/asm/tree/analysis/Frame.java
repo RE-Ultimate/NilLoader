@@ -403,7 +403,7 @@ public class Frame<V extends Value> {
             break;
           }
         } else {
-          push(value1);
+          push(interpreter.copyOperation(insn, value1));
           push(interpreter.copyOperation(insn, value1));
           break;
         }
