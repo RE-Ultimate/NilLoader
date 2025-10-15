@@ -1,6 +1,7 @@
 package nilloader;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,25 +26,21 @@ import nilloader.api.NilLogger;
 
 class Decompiler {
 
-	private interface QuiltflowerAccess {
+	private interface VineflowerAccess {
 		String decompile(String name, byte[] clazz);
 	}
 	
-	private static final class QuiltflowerAccessImpl implements QuiltflowerAccess {
+	private static final class VineflowerAccessImpl implements VineflowerAccess {
 
-		private final NilLogger log = NilLogger.get("Quiltflower");
+		private final NilLogger log = NilLogger.get("Vineflower");
 		
 		@Override
 		public String decompile(String name, byte[] clazz) {
 			Map<String, Object> options = new HashMap<>();
-			options.put(IFernflowerPreferences.INCLUDE_ENTIRE_CLASSPATH, true);
-			options.put(IFernflowerPreferences.INCLUDE_JAVA_RUNTIME, true);
-			options.put(IFernflowerPreferences.THREADS, 4);
+			options.put(IFernflowerPreferences.INCLUDE_ENTIRE_CLASSPATH, "0");
+			options.put(IFernflowerPreferences.INCLUDE_JAVA_RUNTIME, "1");
+			options.put(IFernflowerPreferences.THREADS, "4");
 			options.put(IFernflowerPreferences.INDENT_STRING, "\t");
-			options.put(IFernflowerPreferences.FINALLY_DEINLINE, true);
-			options.put(IFernflowerPreferences.USE_METHOD_PARAMETERS, true);
-			options.put(IFernflowerPreferences.USE_DEBUG_VAR_NAMES, true);
-			options.put(IFernflowerPreferences.DECOMPILE_GENERIC_SIGNATURES, true);
 			String[] contentArr = new String[] { "// decompilation failed" };
 			Fernflower ff = new Fernflower(new IBytecodeProvider() {
 				
@@ -52,7 +49,7 @@ class Decompiler {
 					if (externalPath != null && externalPath.endsWith(".nil/bad-fernflower-workaround/this-file-does-not-exist.class")) {
 						return clazz;
 					}
-					return new byte[0];
+					throw new FileNotFoundException();
 				}
 			}, new IResultSaver() {
 				@Override public void saveFolder(String path) {}
@@ -71,6 +68,7 @@ class Decompiler {
 				
 				@Override
 				public void writeMessage(String message, Severity severity, Throwable t) {
+					if (t instanceof FileNotFoundException) return;
 					if (severity == Severity.WARN) {
 						log.warn(message, t);
 					} else if (severity == Severity.ERROR) {
@@ -105,21 +103,55 @@ class Decompiler {
 	}
 	
 	private static boolean failure = false;
-	private static QuiltflowerAccess access = null;
+	private static VineflowerAccess access = null;
+	
+	private enum DecompilerProvider {
+		QUILTFLOWER_1_8_1(8, "1.8.1", "https://maven.quiltmc.org/repository/release/org/quiltmc/quiltflower/1.8.1/quiltflower-1.8.1.jar",
+				"79hnFEabe9+TEz1KefC7gcugcmuCcz3N1Ok/80kolcs=", 874457, true),
+		VINEFLOWER_1_10_1(11, "1.10.1", "https://repo1.maven.org/maven2/org/vineflower/vineflower/1.10.1/vineflower-1.10.1.jar",
+				"ubII5QeTtkZXprYpIGdSZhP1Sd50BfkkNiSwL0J25Ak=", 1778509, true),
+		VINEFLOWER_1_11_1(17, "1.11.1", "https://repo1.maven.org/maven2/org/vineflower/vineflower/1.11.1/vineflower-1.11.1.jar",
+				"phXQfdu81Ik2lnT0DkLfY5wyvpVBCJCzjxc9XB4uo5w=", 1847869, false),
+		;
+		public final String version, url;
+		public final byte[] expectedHash;
+		public final int neededJavaVersion, expectedSize;
+		public final boolean nag;
+		DecompilerProvider(int neededJavaVersion, String version, String url, String expectedHashB64, int expectedSize, boolean nag) {
+			this.neededJavaVersion = neededJavaVersion;
+			this.version = version;
+			this.url = url;
+			this.expectedHash = Base64.getDecoder().decode(expectedHashB64);
+			this.expectedSize = expectedSize;
+			this.nag = nag;
+		}
+	}
 	
 	static void initialize() {
 		try {
 			File dotNil = new File(".nil");
-			File quiltflower = new File(dotNil, "quiltflower.jar");
-			if (!quiltflower.exists()) {
-				NilLoaderLog.log.info("Downloading Quiltflower...");
+			
+			DecompilerProvider dp = DecompilerProvider.QUILTFLOWER_1_8_1;
+			
+			try {
+				String[] jver = System.getProperty("java.version").split("\\.");
+				int jverI = Integer.parseInt("1".equals(jver[0]) ? jver[1] : jver[0]);
+				for (DecompilerProvider opt : DecompilerProvider.values()) {
+					if (opt.neededJavaVersion <= jverI) {
+						dp = opt;
+					}
+				}
+			} catch (Throwable t) {
+				NilLoaderLog.log.error("Failed to parse Java version", t);
+			}
+			
+			File vineflower = new File(dotNil, "vineflower-"+dp.version+".jar");
+			if (!vineflower.exists()) {
+				NilLoaderLog.log.info("Downloading Vineflower v"+dp.version+"..."+(dp.nag ? " (Update Java to use a newer version)" : ""));
 				try {
-					URL u = new URL("https://maven.quiltmc.org/repository/release/org/quiltmc/quiltflower/1.8.1/quiltflower-1.8.1.jar");
-					String expectedHashB64 = "79hnFEabe9+TEz1KefC7gcugcmuCcz3N1Ok/80kolcs=";
-					byte[] expectedHash = Base64.getDecoder().decode(expectedHashB64);
-					int expectedSize = 874457;
+					URL u = new URL(dp.url);
 					dotNil.mkdirs();
-					File tmp = File.createTempFile("quiltflower", ".jar.part", dotNil);
+					File tmp = File.createTempFile("vineflower", ".jar.part", dotNil);
 					byte[] buf = new byte[4096];
 					MessageDigest digest = MessageDigest.getInstance("SHA-256");
 					int realSize = 0;
@@ -128,26 +160,27 @@ class Decompiler {
 							int read = in.read(buf);
 							if (read == -1) break;
 							realSize += read;
-							if (realSize > expectedSize) throw new IOException("File is longer than expected length "+expectedSize);
+							if (realSize > dp.expectedSize) throw new IOException("File is longer than expected length "+dp.expectedSize);
 							out.write(buf, 0, read);
 							digest.update(buf, 0, read);
 						}
 					}
+					if (realSize < dp.expectedSize) throw new IOException("File is shorter than expected length "+dp.expectedSize);
 					byte[] realHash = digest.digest();
-					if (!Arrays.equals(expectedHash, realHash)) {
-						throw new IOException("File hash is incorrect (got "+Base64.getEncoder().encodeToString(realHash)+", but expected "+expectedHashB64+")");
+					if (!Arrays.equals(dp.expectedHash, realHash)) {
+						throw new IOException("File hash is incorrect (got "+Base64.getEncoder().encodeToString(realHash)+", but expected "+Base64.getEncoder().encodeToString(dp.expectedHash)+")");
 					}
-					tmp.renameTo(quiltflower);
+					tmp.renameTo(vineflower);
 				} catch (IOException | NoSuchAlgorithmException e) {
-					NilLoaderLog.log.error("Failed to download Quiltflower", e);
+					NilLoaderLog.log.error("Failed to download Vineflower", e);
 					failure = true;
 					return;
 				}
 			}
-			NilAgent.injectToSearchPath(new JarFile(quiltflower));
-			access = new QuiltflowerAccessImpl();
+			NilAgent.injectToSearchPath(new JarFile(vineflower));
+			access = new VineflowerAccessImpl();
 		} catch (Throwable t) {
-			NilLoaderLog.log.error("Failed to load Quiltflower", t);
+			NilLoaderLog.log.error("Failed to load Vineflower", t);
 			failure = true;
 			return;
 		}

@@ -13,7 +13,7 @@ public class NilLoader {
 
 	/**
 	 * Inject the NilLoader agent into the currently running JVM and fire the {@code hijack}
-	 * entrypoint. Requires a JDK.
+	 * entrypoint.
 	 */
 	public static void hijack() {
 		if (NilAgentPart.getInitializations() > 0) {
@@ -30,16 +30,10 @@ public class NilLoader {
 			if (System.getProperty("os.name").toLowerCase(Locale.ROOT).contains("win")) {
 				suffix = "w.exe";
 			}
-			String tools = System.getProperty("java.home")+"/../lib/tools.jar";
-			String classpathSuffix = "";
-			if (new File(tools).exists()) {
-				// JDK 8, need to add tools.jar to classpath instead of it being a jmod that just exists
-				classpathSuffix = File.pathSeparator+tools;
-			}
 			String ourPath = new File(NilAgentPart.getJarURL(NilLoader.class.getProtectionDomain().getCodeSource().getLocation()).toURI()).getAbsolutePath();
 			Process p = new ProcessBuilder(
 						System.getProperty("java.home")+File.separator+"bin"+File.separator+"java"+suffix,
-						"-cp", ourPath+classpathSuffix,
+						"-cp", ourPath,
 						"nilloader.impl.Hijacker",
 						pid, ourPath)
 					.inheritIO()

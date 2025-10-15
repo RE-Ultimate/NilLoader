@@ -1,5 +1,5 @@
 plugins {
-	id 'com.github.ben-manes.versions' version '0.51.0'
+	id 'com.github.ben-manes.versions' version '0.53.0'
 	id 'com.gradleup.shadow' version '8.3.5'
 	id 'java-library'
 	id 'maven-publish'
@@ -28,17 +28,17 @@ configurations {
 }
 
 dependencies {
-	shade 'org.ow2.asm:asm:9.7.1'
-	shade 'org.ow2.asm:asm-tree:9.7.1'
-	shade 'org.ow2.asm:asm-analysis:9.7.1'
-	shade 'org.ow2.asm:asm-commons:9.7.1'
+	shade 'org.ow2.asm:asm:9.9'
+	shade 'org.ow2.asm:asm-tree:9.9'
+	shade 'org.ow2.asm:asm-analysis:9.9'
+	shade 'org.ow2.asm:asm-commons:9.9'
 	
 	shade 'org.cadixdev:lorenz:0.5.8'
 	shade 'org.cadixdev:lorenz-asm:0.5.8'
 
-	shade 'com.grack:nanojson:1.9'
+	shade 'com.grack:nanojson:1.10'
 	
-	compileOnly 'org.vineflower:vineflower:1.10.1'
+	compileOnly 'org.vineflower:vineflower:1.11.1'
 	compileOnly 'org.slf4j:slf4j-api:1.7.36'
 	compileOnly 'org.apache.logging.log4j:log4j-api:2.24.3'
 	compileOnly 'log4j:log4j:1.2.17'
