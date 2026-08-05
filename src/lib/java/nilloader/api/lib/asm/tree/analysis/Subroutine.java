@@ -94,8 +94,7 @@ final class Subroutine {
       }
     }
     if (subroutine.start == start) {
-      for (int i = 0; i < subroutine.callers.size(); ++i) {
-        JumpInsnNode caller = subroutine.callers.get(i);
+      for (JumpInsnNode caller : subroutine.callers) {
         if (!callers.contains(caller)) {
           callers.add(caller);
           changed = true;

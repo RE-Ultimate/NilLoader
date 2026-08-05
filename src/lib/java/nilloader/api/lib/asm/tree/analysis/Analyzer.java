@@ -120,15 +120,14 @@ public class Analyzer<V extends Value> implements Opcodes {
 
     // For each exception handler, and each instruction within its range, record in 'handlers' the
     // fact that execution can flow from this instruction to the exception handler.
-    for (int i = 0; i < method.tryCatchBlocks.size(); ++i) {
-      TryCatchBlockNode tryCatchBlock = method.tryCatchBlocks.get(i);
+    for (TryCatchBlockNode tryCatchBlock : method.tryCatchBlocks) {
       int startIndex = insnList.indexOf(tryCatchBlock.start);
       int endIndex = insnList.indexOf(tryCatchBlock.end);
-      for (int j = startIndex; j < endIndex; ++j) {
-        List<TryCatchBlockNode> insnHandlers = handlers[j];
+      for (int i = startIndex; i < endIndex; ++i) {
+        List<TryCatchBlockNode> insnHandlers = handlers[i];
         if (insnHandlers == null) {
           insnHandlers = new ArrayList<>();
-          handlers[j] = insnHandlers;
+          handlers[i] = insnHandlers;
         }
         insnHandlers.add(tryCatchBlock);
       }
@@ -198,8 +197,7 @@ public class Analyzer<V extends Value> implements Opcodes {
             currentFrame.initJumpTarget(insnOpcode, lookupSwitchInsn.dflt);
             merge(targetInsnIndex, currentFrame, subroutine);
             newControlFlowEdge(insnIndex, targetInsnIndex);
-            for (int i = 0; i < lookupSwitchInsn.labels.size(); ++i) {
-              LabelNode label = lookupSwitchInsn.labels.get(i);
+            for (LabelNode label : lookupSwitchInsn.labels) {
               targetInsnIndex = insnList.indexOf(label);
               currentFrame.initJumpTarget(insnOpcode, label);
               merge(targetInsnIndex, currentFrame, subroutine);
@@ -211,8 +209,7 @@ public class Analyzer<V extends Value> implements Opcodes {
             currentFrame.initJumpTarget(insnOpcode, tableSwitchInsn.dflt);
             merge(targetInsnIndex, currentFrame, subroutine);
             newControlFlowEdge(insnIndex, targetInsnIndex);
-            for (int i = 0; i < tableSwitchInsn.labels.size(); ++i) {
-              LabelNode label = tableSwitchInsn.labels.get(i);
+            for (LabelNode label : tableSwitchInsn.labels) {
               currentFrame.initJumpTarget(insnOpcode, label);
               targetInsnIndex = insnList.indexOf(label);
               merge(targetInsnIndex, currentFrame, subroutine);
@@ -222,8 +219,7 @@ public class Analyzer<V extends Value> implements Opcodes {
             if (subroutine == null) {
               throw new AnalyzerException(insnNode, "RET instruction outside of a subroutine");
             }
-            for (int i = 0; i < subroutine.callers.size(); ++i) {
-              JumpInsnNode caller = subroutine.callers.get(i);
+            for (JumpInsnNode caller : subroutine.callers) {
               int jsrInsnIndex = insnList.indexOf(caller);
               if (frames[jsrInsnIndex] != null) {
                 merge(

@@ -64,7 +64,7 @@ public class SimpleRemapper extends Remapper {
    *
    * @deprecated use {@link #SimpleRemapper(int, Map)} instead.
    */
-  @Deprecated
+  @Deprecated(forRemoval = false)
   public SimpleRemapper(final Map<String, String> mapping) {
     this.mapping = mapping;
   }
@@ -104,7 +104,7 @@ public class SimpleRemapper extends Remapper {
    *     nilloader.api.lib.asm.Type#getInternalName()}).
    * @deprecated use {@link #SimpleRemapper(int, String, String)} instead.
    */
-  @Deprecated
+  @Deprecated(forRemoval = false)
   public SimpleRemapper(final String oldName, final String newName) {
     this.mapping = Collections.singletonMap(oldName, newName);
   }
@@ -130,14 +130,23 @@ public class SimpleRemapper extends Remapper {
     return remappedName == null ? name : remappedName;
   }
 
+  /**
+   * Maps an invokedynamic or a constant dynamic method name to its new name.
+   *
+   * @param name the name of the method.
+   * @param descriptor the descriptor of the method.
+   * @return the new name of the method.
+   * @deprecated use {@link #mapInvokeDynamicMethodName(String, String, Handle, Object...)} instead.
+   */
   @Override
+  @Deprecated(forRemoval = false)
   public String mapInvokeDynamicMethodName(final String name, final String descriptor) {
     String remappedName = map('.' + name + descriptor);
     return remappedName == null ? name : remappedName;
   }
 
   @Override
-  public String mapInvokeDynamicMethodName(
+  public String mapBasicInvokeDynamicMethodName(
       final String name,
       final String descriptor,
       final Handle bootstrapMethodHandle,

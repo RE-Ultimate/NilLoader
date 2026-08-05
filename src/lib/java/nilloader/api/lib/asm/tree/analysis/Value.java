@@ -32,6 +32,7 @@ package nilloader.api.lib.asm.tree.analysis;
  *
  * @author Eric Bruneton
  */
+@FunctionalInterface
 public interface Value {
 
   /**

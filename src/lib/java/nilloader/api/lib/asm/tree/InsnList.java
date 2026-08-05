@@ -227,7 +227,6 @@ public class InsnList implements Iterable<AbstractInsnNode> {
     ++size;
     if (lastInsn == null) {
       firstInsn = insnNode;
-      lastInsn = insnNode;
     } else {
       lastInsn.nextInsn = insnNode;
       insnNode.previousInsn = lastInsn;
@@ -269,7 +268,6 @@ public class InsnList implements Iterable<AbstractInsnNode> {
   public void insert(final AbstractInsnNode insnNode) {
     ++size;
     if (firstInsn == null) {
-      firstInsn = insnNode;
       lastInsn = insnNode;
     } else {
       firstInsn.previousInsn = insnNode;

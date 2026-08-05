@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import nilloader.api.lib.qdcss.QDCSS;
 
@@ -41,9 +42,13 @@ public class NilMetadata {
 	 */
 	public final File source;
 	
+	private static final Pattern BAD_PATTERN = Pattern.compile("nil+[^a-z]*?loader", Pattern.CASE_INSENSITIVE);
 	
 	public NilMetadata(String id, String name, String description,
 			String authors, String version, Map<String, String> entrypoints, File source) {
+		if (id != "nilloader" && (BAD_PATTERN.matcher(id).find() || BAD_PATTERN.matcher(name).find())) {
+			throw new IllegalArgumentException("Cannot construct Nil metadata that purports to be related to NilLoader itself");
+		}
 		this.id = id;
 		this.name = name;
 		this.description = description;
