@@ -40,10 +40,8 @@ ports to Beta 1.7, early versions of Forge, NFC, etc. That is, more or less, its
 ## Using NilLoader
 
 More comprehensive docs coming soon, but for now, check out [NilExample](https://git.sleeping.town/unascribed/NilExample)
-to write mods, and use [this Prism Launcher component JSON](https://repo.sleeping.town/com/unascribed/nilloader/1.3.5/nilloader-1.3.5-prism.json)
-to install it. (Click "Add Empty" under versions, enter "NilLoader" and
-"com.unascribed.nilloader", then click Edit on the right, and replace the contents
-of the file it opens with that JSON.)
+to write mods, and download [this Prism Launcher component JSON](https://repo.sleeping.town/com/unascribed/nilloader/1.4.0/nilloader-1.4.0-prism.json)
+to install it. (Click "Import Components" on the Version tab and select the JSON file.)
 
 For other launchers, download the latest NilLoader from releases,
 put it in your .minecraft, rename it to `NilLoader.jar`, and add
