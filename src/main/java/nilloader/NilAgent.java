@@ -63,7 +63,6 @@ import nilloader.impl.Fuse;
 import nilloader.impl.FuseList;
 import nilloader.impl.FuseMap;
 import nilloader.impl.FuseSet;
-import nilloader.impl.fixes.BanNilDeepReflectionTransformer;
 import nilloader.impl.fixes.NewKnotClassLoaderTransformer;
 import nilloader.impl.fixes.OldKnotClassLoaderTransformer;
 import nilloader.impl.fixes.RelaunchClassLoaderTransformer;
@@ -170,7 +169,6 @@ public class NilAgent {
 			return NilAgent.transform(loader, className, classfileBuffer, classBeingRedefined != null);
 		}, ins.isRetransformClassesSupported());
 
-		registerTransformer(new BanNilDeepReflectionTransformer());
 		// TODO it'd be nice to do this in a more generic way instead of needing loader-specific hacks
 		if (loadedClasses.containsKey("cpw.mods.fml.relauncher.RelaunchClassLoader")) {
 			try {
