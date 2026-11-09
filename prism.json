@@ -6,7 +6,7 @@
 	"+agents": [
 		{
 			"name": "com.unascribed:nilloader:${version}",
-			"url": "https://repo.sleeping.town"
+			"url": "https://raw.githubusercontent.com/RE-Ultimate/maven/main"
 		}
 	]
 }
